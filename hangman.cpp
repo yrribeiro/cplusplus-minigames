@@ -13,15 +13,20 @@ bool verifyPlayerHasWon(string sw, map<char, bool> mapping);
 bool verifyHanging(vector<char> vc);
 void showLoserMessage(string sw);
 string chooseSecretWord();
+void addMoreWords();
 
 int main(){
-    // const string SECRET_WORD = "oliver";
+    // const string SECRET_WORD = "caçarola";
     const string SECRET_WORD = chooseSecretWord();
+    if (SECRET_WORD.size() == 1){
+        cout << "Cannot find secret words file." << endl;
+        exit(0);
+    }
+
     map<char, bool> hasGuessed;
     vector<char> wrongKicks;
     bool hasMissed=true, notHanged=true;
-    char kick;
-    // cout << SECRET_WORD << endl;
+    char kick, res;
 
     cout << "---------------------------------" << endl;
     cout << "- Welcome to The Hangman Game! -" << endl;
@@ -57,6 +62,10 @@ int main(){
 
     if (!notHanged)
         showLoserMessage(SECRET_WORD);
+    cout << "\nDo you wish to add more words to the database? [y/n]" << endl;
+    cin >> res;
+    if (res == 'y')
+        addMoreWords();
 }
 
 bool verifyLetter(char kick, string sw){
@@ -89,11 +98,28 @@ void showLoserMessage(string sw){
 }
 
 string chooseSecretWord(){
-    vector<string> words;
-    string line;
     ifstream file("secret_words.txt");
-    while (getline(file, line)) words.push_back(line);
+    if (!file.fail()){
+        vector<string> words;
+        string line;
+        while (getline(file, line))
+            words.push_back(line);
+        file.close();
+        srand(time(NULL));
+        return words[rand() % words.size()];
+    }
+    return "!";
+}
 
-    srand(time(NULL));
-    return words[rand() % words.size()];
+void addMoreWords(){
+    ofstream outfile;
+    string newWord;
+    cout << "- Type the new word [english and lowercased] -" << endl;
+    cin >> newWord;
+    outfile.open("secret_words.txt", std::ios_base::app); // append instead of overwrite
+    outfile << "\n";
+    outfile << newWord;
+    outfile.close();
+
+    cout << "\n---- Word successfully added!" << endl;
 }
